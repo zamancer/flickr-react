@@ -4,13 +4,15 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "bundle": "parcel index.html"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "devDependencies": {
         "husky": "4.2.3",
+        "parcel-bundler": "^1.12.4",
         "prettier": "^1.19.1",
         "pretty-quick": "^2.0.1"
     },
@@ -18,5 +20,9 @@
         "hooks": {
             "pre-commit": "pretty-quick --staged"
         }
+    },
+    "dependencies": {
+        "jquery": "^3.4.1",
+        "ramda": "^0.27.0"
     }
 }
