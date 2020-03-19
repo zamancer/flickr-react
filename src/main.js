@@ -1,33 +1,27 @@
-const CDN = s => `https://cdnjs.cloudflare.com/ajax/libs/${s}`;
-const ramda = CDN('ramda/0.21.0/ramda.min');
-const jquery = CDN('jquery/3.0.0-rc1/jquery.min');
+import { compose, curry, map, prop } from 'ramda';
+import { url, requestResource } from './flickrApiClient';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-requirejs.config({ paths: { ramda, jquery } });
-require(['jquery', 'ramda'], ($, { compose, curry, map, prop }) => {
-    // -- Utils ----------------------------------------------------------
-    const Impure = {
-        trace: curry((tag, x) => {
-            console.log(tag, x);
-            return x;
-        }),
-        getJSON: curry((callback, url) => $.getJSON(url, callback)),
-        setHtml: curry((sel, html) => $(sel).html(html)),
-    };
+// -- Utils ----------------------------------------------------------
+const Impure = {
+    trace: curry((tag, x) => {
+        console.log(tag, x);
+        return x;
+    }),
+    setHtml: curry((sel, component) =>
+        ReactDOM.render(component, document.getElementById(sel))
+    ),
+};
 
-    // -- Pure -----------------------------------------------------------
-    const host = 'api.flickr.com';
-    const path = '/services/feeds/photos_public.gne';
-    const query = t => `?tags=${t}&format=json&jsoncallback=?`;
-    const url = t => `https://${host}${path}${query(t)}`;
+// -- Pure -----------------------------------------------------------
+const Img = src => <img key={src} src={src} />;
+const mediaUrl = compose(prop('m'), prop('media'));
+const mediaUrls = compose(map(mediaUrl), prop('items'));
+const images = compose(map(Img), mediaUrls);
 
-    const img = src => $('<img />', { src });
-    const mediaUrl = compose(prop('m'), prop('media'));
-    const mediaUrls = compose(map(mediaUrl), prop('items'));
-    const images = compose(map(img), mediaUrls);
+// -- Impure ---------------------------------------------------------
+const render = compose(Impure.setHtml('js-main'), images);
+const app = compose(requestResource(render), url);
 
-    // -- Impure ---------------------------------------------------------
-    const render = compose(Impure.setHtml('#js-main'), images);
-    const app = compose(Impure.getJSON(render), url);
-
-    app('cats');
-});
+app('cats');
